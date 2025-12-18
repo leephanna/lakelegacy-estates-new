@@ -1,81 +1,104 @@
 // app/api/lead/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-// Run on Node so we can read process.env safely
-export const runtime = "nodejs";
+export const runtime = "nodejs";         // we need process.env
+export const dynamic = "force-dynamic";  // avoid any caching
 
-// Health ping (optional)
+// Basic CORS (browser form posts from your site)
+const corsHeaders = (origin: string | null) => ({
+  "Access-Control-Allow-Origin": origin ?? "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS, GET",
+  "Access-Control-Allow-Headers": "Content-Type, Origin",
+  "Access-Control-Max-Age": "86400",
+  Vary: "Origin",
+});
+
+// Health ping
 export async function GET() {
-  return NextResponse.json({ ok: true, message: "Lead API ready (Phase 2)" });
+  return NextResponse.json({ ok: true, message: "Lead API wired to Worker" });
 }
 
-// CORS preflight for form posts
-export async function OPTIONS() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type",
-    },
-  });
+// Preflight
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  return new NextResponse(null, { status: 204, headers: corsHeaders(origin) });
 }
 
 type LeadPayload = {
-  form_kind: "buyer" | "seller" | "partner" | "address_unlock" | "nda" | string;
-  name: string;
-  email: string;
+  form_kind?: "buyer" | "seller" | "partner" | "address_unlock" | "nda" | "generic";
+  name?: string;
+  email?: string;
   phone?: string;
   message?: string;
 };
 
 export async function POST(req: NextRequest) {
+  const origin = req.headers.get("origin");
+  let body: Partial<LeadPayload> = {};
+
   try {
-    const body = (await req.json()) as Partial<LeadPayload>;
-    const { form_kind, name, email, phone = "", message = "" } = body ?? {};
+    body = (await req.json()) as Partial<LeadPayload>;
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Invalid JSON" },
+      { status: 400, headers: corsHeaders(origin) }
+    );
+  }
 
-    // Basic validation
-    if (!form_kind || !name || !email) {
-      return NextResponse.json(
-        { ok: false, error: "Missing required fields (form_kind, name, email)" },
-        { status: 400 }
-      );
-    }
+  const { form_kind = "buyer", name = "", email = "", phone = "", message = "" } = body;
 
-    // Forward to Cloudflare Worker
-    const workerUrl =
-      process.env.WORKER_LEAD_URL ||
-      "https://ai4u-concierge-mail.leehanna8.workers.dev/lead";
+  if (!name || !email) {
+    return NextResponse.json(
+      { ok: false, error: "Missing required fields (name, email)" },
+      { status: 400, headers: corsHeaders(origin) }
+    );
+  }
 
-    const forwarded = await fetch(workerUrl, {
+  const workerUrl = process.env.WORKER_LEAD_URL;
+  if (!workerUrl) {
+    return NextResponse.json(
+      { ok: false, error: "WORKER_LEAD_URL not configured on Vercel" },
+      { status: 500, headers: corsHeaders(origin) }
+    );
+  }
+
+  // Forward to the Worker; pass Origin through so CORS policy can validate it
+  try {
+    const res = await fetch(workerUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        // Pass through the real page origin (helps CORS logs/debug)
-        Origin:
-          req.headers.get("origin") ?? "https://lakelegacy-estates-new.vercel.app",
+        // Propagate origin so Worker allow-list can see the real site origin
+        ...(origin ? { Origin: origin } : {}),
       },
       body: JSON.stringify({ form_kind, name, email, phone, message }),
+      // Reasonable guardrail
+      cache: "no-store",
     });
 
-    // Bubble up Worker response
-    const text = await forwarded.text();
-    let data: any;
-    try { data = JSON.parse(text); } catch { data = { raw: text }; }
+    const text = await res.text();
+    const maybeJson = safeJson(text);
 
-    if (!forwarded.ok) {
+    if (!res.ok) {
       return NextResponse.json(
-        { ok: false, status: forwarded.status, data },
-        { status: 502 }
+        { ok: false, upstream_status: res.status, error: "Worker call failed", details: maybeJson ?? text },
+        { status: 502, headers: corsHeaders(origin) }
       );
     }
 
-    return NextResponse.json({ ok: true, data });
-  } catch (err: any) {
+    return NextResponse.json(maybeJson ?? { ok: true, sent: true }, { headers: corsHeaders(origin) });
+  } catch (e: any) {
     return NextResponse.json(
-      { ok: false, error: err?.message ?? "Unknown error" },
-      { status: 500 }
+      { ok: false, error: "Network error contacting Worker", details: String(e?.message || e) },
+      { status: 502, headers: corsHeaders(origin) }
     );
   }
 }
 
+function safeJson(s: string) {
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
