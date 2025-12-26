@@ -20,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="nav-links" aria-label="Primary">
               <Link href="/buyers">Buyers</Link>
               <Link href="/sellers">Sellers</Link>
+              <Link href="/off-market">Off-Market Alerts</Link>
               <Link href="/partners">Partners</Link>
               <Link href="/referral">Referral</Link>
             </nav>
