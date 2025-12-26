@@ -1,27 +1,44 @@
-import "./globals.css";
-import type { ReactNode } from "react";
+import './globals.css'
+import Link from 'next/link'
+import type { Metadata } from 'next'
 
-export const metadata = {
-  title: "Lake & Legacy Estates",
-  description: "Digital concierge for premium lakeshore properties"
-};
+export const metadata: Metadata = {
+  title: 'Lake & Legacy Estates',
+  description: 'Luxury lakefront real estate concierge for buyers, sellers, partners, and referrals.',
+}
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-50">
-        <header className="w-full border-b border-slate-800 bg-slate-950/40 backdrop-blur">
-          <nav className="max-w-5xl mx-auto flex gap-4 py-4 text-sm">
-            <a href="/" className="font-semibold">Home</a>
-            <a href="/buyers">Buyers</a>
-            <a href="/sellers">Sellers</a>
-            <a href="/partners">Partners</a>
-            <a href="/referral">Referral</a>
-            <a href="/ping">Ping</a>
-          </nav>
+      <body>
+        <header className="nav">
+          <div className="nav-inner">
+            <Link className="brand" href="/">
+              Lake &amp; Legacy
+            </Link>
+
+            <nav className="nav-links" aria-label="Primary">
+              <Link href="/buyers">Buyers</Link>
+              <Link href="/sellers">Sellers</Link>
+              <Link href="/partners">Partners</Link>
+              <Link href="/referral">Referral</Link>
+            </nav>
+
+            <Link className="nav-cta" href="/buyers">
+              Get Matched
+            </Link>
+          </div>
         </header>
-        <main className="max-w-5xl mx-auto py-10">{children}</main>
+
+        <main className="container">{children}</main>
+
+        <footer className="footer">
+          <div className="footer-inner">
+            <div>© {new Date().getFullYear()} Lake &amp; Legacy Estates</div>
+            <div className="footer-sub">Luxury lakefront concierge • Minnesota</div>
+          </div>
+        </footer>
       </body>
     </html>
-  );
+  )
 }
