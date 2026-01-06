@@ -28,9 +28,9 @@ export default function HomePage() {
             Coldwell Banker - Leonhardt Team
           </p>
           <div className="actions" style={{ justifyContent: 'center', marginBottom: '32px' }}>
-            <Link href="/buyers">
+            <Link href="/private-match">
               <button className="btn-primary" style={{ padding: '14px 32px', fontSize: '16px' }}>
-                Private Client Intake
+                Get My Private Matches
               </button>
             </Link>
             <Link href="/off-market">
