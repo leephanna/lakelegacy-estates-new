@@ -24,10 +24,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/sellers">For Sellers</Link>
               <Link href="/guides">Guides</Link>
               <Link href="/partners">Partner</Link>
+              <Link href="/private-match">Private Match</Link>
             </nav>
 
-            <Link className="nav-cta" href="/buyers">
-              Get Started
+            <Link className="nav-cta" href="/private-match">
+              Private Match
             </Link>
           </div>
         </header>
