@@ -1,246 +1,131 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-type SubmitStatus = 'idle' | 'success' | 'error';
-
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-
-  sellingSituation: string;
-  timeline: string;
-
-  propertyType: string;
-  locationFocus: string; // lake/area/county/city
-  approxValue: string;
-
-  privacyLevel: string;
-  showingsReadiness: string;
-  motivation: string;
-
-  notes: string;
-
-  website: string; // honeypot
-}
-
-const SELLING_SITUATION_OPTIONS = [
-  { value: '', label: 'Select your situation…' },
-  { value: 'considering', label: 'Considering a sale (early stage)' },
-  { value: 'ready_now', label: 'Ready to sell soon' },
-  { value: 'testing_off_market', label: 'Testing discreet off-market interest' },
-  { value: 'relocation', label: 'Relocation / timing-driven' },
-  { value: 'estate', label: 'Estate / trust / family transition' },
-];
-
-const TIMELINE_OPTIONS = [
-  { value: '', label: 'Select timeline…' },
-  { value: '0_3', label: '0–3 months' },
-  { value: '3_6', label: '3–6 months' },
-  { value: '6_12', label: '6–12 months' },
-  { value: '12_plus', label: '12+ months' },
-];
-
-const PROPERTY_TYPE_OPTIONS = [
-  { value: '', label: 'Select property type…' },
-  { value: 'lake_home', label: 'Lake home' },
-  { value: 'cabin', label: 'Cabin' },
-  { value: 'luxury_estate', label: 'Luxury estate' },
-  { value: 'land', label: 'Lake lot / land' },
-  { value: 'multi', label: 'Multi-property portfolio' },
-];
-
-const APPROX_VALUE_OPTIONS = [
-  { value: '', label: 'Select estimated value…' },
-  { value: 'under_750', label: 'Under $750K' },
-  { value: '750_1_25', label: '$750K – $1.25M' },
-  { value: '1_25_2_5', label: '$1.25M – $2.5M' },
-  { value: '2_5_5', label: '$2.5M – $5M' },
-  { value: '5_plus', label: '$5M+' },
-];
-
-const PRIVACY_OPTIONS = [
-  { value: '', label: 'Select privacy preference…' },
-  { value: 'very_discreet', label: 'Very discreet (no public marketing)' },
-  { value: 'select_buyers', label: 'Quiet marketing to select qualified buyers' },
-  { value: 'open_to_mls', label: 'Open to MLS later (start private first)' },
-];
-
-const SHOWINGS_OPTIONS = [
-  { value: '', label: 'Select readiness…' },
-  { value: 'ready', label: 'Ready for private showings soon' },
-  { value: 'prep_needed', label: 'Some prep needed first' },
-  { value: 'seasonal', label: 'Seasonal timing (spring/summer/fall)' },
-];
-
-const styles = {
-  page: 'mx-auto w-full max-w-5xl px-4 py-10 md:py-14',
-  h1: 'font-serif text-4xl md:text-6xl tracking-tight text-neutral-900',
-  sub: 'mt-3 text-base md:text-lg text-neutral-700 max-w-3xl',
-  card: 'mt-8 rounded-2xl border border-neutral-200 bg-white shadow-sm',
-  cardInner: 'p-6 md:p-8',
-  sectionTitle: 'text-sm font-semibold tracking-widest text-neutral-600 uppercase',
-  grid2: 'mt-4 grid grid-cols-1 gap-4 md:grid-cols-2',
-  label: 'block text-sm font-medium text-neutral-800',
-  input:
-    'mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 shadow-sm outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400',
-  select:
-    'mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 shadow-sm outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400',
-  textarea:
-    'mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-neutral-900 shadow-sm outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 min-h-[120px]',
-  hr: 'my-8 border-neutral-200',
-  btnRow: 'mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between',
-  btn:
-    'inline-flex items-center justify-center rounded-xl bg-[#b89b5e] px-5 py-3 text-sm font-semibold text-white shadow-sm hover:brightness-95 active:brightness-90 disabled:opacity-60',
-  fine: 'text-xs text-neutral-600',
-  alertErr:
-    'mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800',
-  alertOk:
-    'mt-4 rounded-2xl border border-neutral-200 bg-white px-6 py-10 text-center shadow-sm',
-  okTitle: 'font-serif text-3xl md:text-4xl text-neutral-900',
-  okSub: 'mt-2 text-sm md:text-base text-neutral-700',
-};
-
-function buildMessage(data: FormData) {
-  const lines: string[] = [];
-  lines.push('PRIVATE SELL REQUEST');
-  lines.push('');
-  lines.push(`Situation: ${data.sellingSituation || '-'}`);
-  lines.push(`Timeline: ${data.timeline || '-'}`);
-  lines.push('');
-  lines.push(`Property Type: ${data.propertyType || '-'}`);
-  lines.push(`Location Focus: ${data.locationFocus || '-'}`);
-  lines.push(`Estimated Value: ${data.approxValue || '-'}`);
-  lines.push('');
-  lines.push(`Privacy Level: ${data.privacyLevel || '-'}`);
-  lines.push(`Showings Readiness: ${data.showingsReadiness || '-'}`);
-  lines.push('');
-  if (data.motivation?.trim()) {
-    lines.push('Motivation / Context:');
-    lines.push(data.motivation.trim());
-    lines.push('');
-  }
-  if (data.notes?.trim()) {
-    lines.push('Additional Notes:');
-    lines.push(data.notes.trim());
-    lines.push('');
-  }
-  return lines.join('\n');
-}
+type Status = "idle" | "submitting" | "success" | "error";
 
 export default function PrivateSellPage() {
-  const [form, setForm] = useState<FormData>({
-    name: '',
-    email: '',
-    phone: '',
+  const endpoint = process.env.NEXT_PUBLIC_LEAD_ENDPOINT;
 
-    sellingSituation: '',
-    timeline: '',
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
-    propertyType: '',
-    locationFocus: '',
-    approxValue: '',
+  // Contact
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
-    privacyLevel: '',
-    showingsReadiness: '',
-    motivation: '',
+  // Honeypot
+  const [website, setWebsite] = useState("");
 
-    notes: '',
-    website: '',
-  });
+  // Seller specifics
+  const [address, setAddress] = useState("");
+  const [propertyType, setPropertyType] = useState("Lakefront Home");
+  const [timeline, setTimeline] = useState("1–3 months");
+  const [priceRange, setPriceRange] = useState("$1.0M–$2.0M");
+  const [occupancy, setOccupancy] = useState("Owner-occupied");
+  const [privacyPrefs, setPrivacyPrefs] = useState<string[]>([]);
+  const [notes, setNotes] = useState("");
 
-  const [status, setStatus] = useState<SubmitStatus>('idle');
-  const [errorMsg, setErrorMsg] = useState<string>('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const privacyOptions = useMemo(
+    () => [
+      "No yard sign",
+      "No public listing (off-market only)",
+      "Showings by appointment only",
+      "Neighbor discretion",
+      "Anonymous marketing (no address online)",
+      "Limited buyer pool (pre-qualified only)",
+    ],
+    []
+  );
 
-  // NOTE: In Next.js, NEXT_PUBLIC_* env vars are inlined at build time.
-  const leadEndpoint = useMemo(() => {
-    return (process.env.NEXT_PUBLIC_LEAD_ENDPOINT || '').trim();
-  }, []);
-
-  const canSubmit = useMemo(() => {
-    return (
-      form.name.trim() &&
-      form.email.trim() &&
-      form.phone.trim() &&
-      form.sellingSituation &&
-      form.timeline &&
-      form.propertyType &&
-      form.approxValue &&
-      form.privacyLevel
+  function togglePrivacy(option: string) {
+    setPrivacyPrefs((prev) =>
+      prev.includes(option) ? prev.filter((x) => x !== option) : [...prev, option]
     );
-  }, [form]);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus('idle');
-    setErrorMsg('');
+    setErrorMsg("");
 
-    // honeypot hit -> pretend success (bot gets no signal)
-    if (form.website?.trim()) {
-      setStatus('success');
+    // Honeypot: if filled, silently accept (bots)
+    if (website?.trim()) {
+      setStatus("success");
       return;
     }
 
-    if (!leadEndpoint) {
-      setStatus('error');
+    if (!endpoint) {
+      setStatus("error");
       setErrorMsg(
-        'Lead endpoint is not configured. Please set NEXT_PUBLIC_LEAD_ENDPOINT in Vercel.'
+        "Lead endpoint is not configured. Please set NEXT_PUBLIC_LEAD_ENDPOINT in Vercel and redeploy."
       );
       return;
     }
 
-    if (!canSubmit) {
-      setStatus('error');
-      setErrorMsg('Please complete all required fields.');
+    if (!name.trim() || !email.trim() || !phone.trim()) {
+      setStatus("error");
+      setErrorMsg("Please complete Full Name, Email, and Phone.");
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        form_kind: 'private_sell',
-        name: form.name.trim(),
-        email: form.email.trim(),
-        phone: form.phone.trim(),
-        message: buildMessage(form),
-        source:
-          typeof window !== 'undefined' ? window.location.href : 'private-sell',
-        website: '', // keep empty (honeypot already checked)
-      };
+    setStatus("submitting");
 
-      const res = await fetch(leadEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+    const message =
+      [
+        "PRIVATE SELLER INTAKE",
+        "",
+        `Property Address: ${address || "(not provided)"}`,
+        `Property Type: ${propertyType}`,
+        `Timeline: ${timeline}`,
+        `Estimated Range: ${priceRange}`,
+        `Occupancy: ${occupancy}`,
+        `Privacy Preferences: ${privacyPrefs.length ? privacyPrefs.join(", ") : "(none selected)"}`,
+        "",
+        "Additional Notes:",
+        notes || "(none)",
+      ].join("\n");
+
+    const payload = {
+      form_kind: "private_sell",
+      name,
+      email,
+      phone,
+      message,
+      source:
+        typeof window !== "undefined" ? window.location.href : "https://lakelegacy-estates-new.vercel.app/private-sell",
+      website: "", // honeypot field
+    };
+
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        const text = await res.text().catch(() => '');
-        throw new Error(text || `Request failed: ${res.status}`);
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Lead submit failed: ${res.status} ${res.statusText} ${txt}`.trim());
       }
 
-      setStatus('success');
+      setStatus("success");
     } catch (err: any) {
-      setStatus('error');
-      setErrorMsg(
-        err?.message?.slice(0, 240) ||
-          'Something went wrong. Please try again, or contact us directly.'
-      );
-    } finally {
-      setIsSubmitting(false);
+      setStatus("error");
+      setErrorMsg(err?.message || "Something went wrong submitting the form.");
     }
   }
 
-  if (status === 'success') {
+  if (status === "success") {
     return (
-      <div className={styles.page}>
-        <div className={styles.alertOk}>
-          <div className={styles.okTitle}>Thanks — we’ll reach out shortly</div>
-          <div className={styles.okSub}>
-            We’ll review your goals, confirm privacy preferences, and follow up
-            with a discreet plan.
+      <div className="mx-auto max-w-3xl">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-10 shadow-xl">
+          <h1 className="text-4xl font-semibold tracking-tight">Thanks — we’ll reach out shortly</h1>
+          <p className="mt-4 text-white/70">
+            We’ll review your privacy preferences and follow up with a discreet next step plan.
+          </p>
+          <div className="mt-8 text-sm text-white/60">
+            Prefer phone? Call <span className="font-semibold text-white">651-262-8312</span>
           </div>
         </div>
       </div>
@@ -248,270 +133,210 @@ export default function PrivateSellPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.h1}>Private Seller Intake</h1>
-      <p className={styles.sub}>
-        Share the basics and your privacy preferences. We’ll build a discreet
-        strategy and (if desired) quietly match with qualified buyers before any
-        public marketing.
-      </p>
+    <div className="mx-auto max-w-6xl">
+      <div className="grid gap-10 md:grid-cols-[1.2fr_0.8fr]">
+        {/* Form */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-10">
+          <h1 className="text-5xl font-semibold tracking-tight">Private Seller Intake</h1>
+          <p className="mt-4 text-white/70">
+            Share the basics and your privacy preferences. We’ll build a discreet strategy and (if desired)
+            quietly match with qualified buyers before any public marketing.
+          </p>
 
-      <div className={styles.card}>
-        <div className={styles.cardInner}>
-          <form onSubmit={onSubmit}>
-            <div className={styles.sectionTitle}>Contact</div>
-            <div className={styles.grid2}>
+          <form onSubmit={onSubmit} className="mt-8 space-y-6">
+            {/* Honeypot */}
+            <div className="hidden">
+              <label className="text-sm">Website</label>
+              <input value={website} onChange={(e) => setWebsite(e.target.value)} />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className={styles.label}>
-                  Full Name <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Full Name *</label>
                 <input
-                  className={styles.input}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-amber-400/70"
                   placeholder="Your full name"
-                  autoComplete="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
-
               <div>
-                <label className={styles.label}>
-                  Email <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Email *</label>
                 <input
-                  className={styles.input}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-amber-400/70"
                   placeholder="you@email.com"
-                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
+            </div>
 
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className={styles.label}>
-                  Phone <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Phone *</label>
                 <input
-                  className={styles.input}
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-amber-400/70"
                   placeholder="(###) ###-####"
-                  autoComplete="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
-
-              {/* honeypot (hidden) */}
-              <div className="hidden">
-                <label className={styles.label}>Website</label>
+              <div>
+                <label className="text-sm text-white/80">Property Address</label>
                 <input
-                  className={styles.input}
-                  value={form.website}
-                  onChange={(e) =>
-                    setForm({ ...form, website: e.target.value })
-                  }
-                  placeholder="Leave blank"
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-amber-400/70"
+                  placeholder="Street / City (optional)"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                 />
               </div>
             </div>
 
-            <div className={styles.hr} />
-
-            <div className={styles.sectionTitle}>Seller Profile</div>
-            <div className={styles.grid2}>
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className={styles.label}>
-                  Where are you in the process?{' '}
-                  <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Property Type</label>
                 <select
-                  className={styles.select}
-                  value={form.sellingSituation}
-                  onChange={(e) =>
-                    setForm({ ...form, sellingSituation: e.target.value })
-                  }
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white outline-none focus:border-amber-400/70"
+                  value={propertyType}
+                  onChange={(e) => setPropertyType(e.target.value)}
                 >
-                  {SELLING_SITUATION_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  <option>Lakefront Home</option>
+                  <option>Luxury Cabin</option>
+                  <option>Estate / Compound</option>
+                  <option>Farm / Acreage</option>
+                  <option>Lot / Buildable</option>
+                  <option>Other</option>
                 </select>
               </div>
 
               <div>
-                <label className={styles.label}>
-                  Timeline <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Timeline *</label>
                 <select
-                  className={styles.select}
-                  value={form.timeline}
-                  onChange={(e) =>
-                    setForm({ ...form, timeline: e.target.value })
-                  }
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white outline-none focus:border-amber-400/70"
+                  value={timeline}
+                  onChange={(e) => setTimeline(e.target.value)}
                 >
-                  {TIMELINE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  <option>ASAP</option>
+                  <option>1–3 months</option>
+                  <option>3–6 months</option>
+                  <option>6–12 months</option>
+                  <option>Exploring options</option>
                 </select>
               </div>
             </div>
 
-            <div className={styles.hr} />
-
-            <div className={styles.sectionTitle}>Property Basics</div>
-            <div className={styles.grid2}>
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className={styles.label}>
-                  Property Type <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Estimated Range</label>
                 <select
-                  className={styles.select}
-                  value={form.propertyType}
-                  onChange={(e) =>
-                    setForm({ ...form, propertyType: e.target.value })
-                  }
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white outline-none focus:border-amber-400/70"
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(e.target.value)}
                 >
-                  {PROPERTY_TYPE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  <option>$750K–$1.0M</option>
+                  <option>$1.0M–$2.0M</option>
+                  <option>$2.0M–$3.5M</option>
+                  <option>$3.5M+</option>
+                  <option>Not sure</option>
                 </select>
               </div>
 
               <div>
-                <label className={styles.label}>
-                  Estimated Value <span className="text-red-600">*</span>
-                </label>
+                <label className="text-sm text-white/80">Occupancy</label>
                 <select
-                  className={styles.select}
-                  value={form.approxValue}
-                  onChange={(e) =>
-                    setForm({ ...form, approxValue: e.target.value })
-                  }
+                  className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white outline-none focus:border-amber-400/70"
+                  value={occupancy}
+                  onChange={(e) => setOccupancy(e.target.value)}
                 >
-                  {APPROX_VALUE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
+                  <option>Owner-occupied</option>
+                  <option>Seasonal / second home</option>
+                  <option>Tenant-occupied</option>
+                  <option>Vacant</option>
                 </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className={styles.label}>
-                  Lake / Area / County (optional)
-                </label>
-                <input
-                  className={styles.input}
-                  value={form.locationFocus}
-                  onChange={(e) =>
-                    setForm({ ...form, locationFocus: e.target.value })
-                  }
-                  placeholder="e.g., Minnetonka / White Bear / Prior Lake / Brainerd Lakes / etc."
-                />
               </div>
             </div>
 
-            <div className={styles.hr} />
-
-            <div className={styles.sectionTitle}>Privacy & Strategy</div>
-            <div className={styles.grid2}>
-              <div>
-                <label className={styles.label}>
-                  Privacy Preference <span className="text-red-600">*</span>
-                </label>
-                <select
-                  className={styles.select}
-                  value={form.privacyLevel}
-                  onChange={(e) =>
-                    setForm({ ...form, privacyLevel: e.target.value })
-                  }
-                >
-                  {PRIVACY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={styles.label}>
-                  Showings Readiness (optional)
-                </label>
-                <select
-                  className={styles.select}
-                  value={form.showingsReadiness}
-                  onChange={(e) =>
-                    setForm({ ...form, showingsReadiness: e.target.value })
-                  }
-                >
-                  {SHOWINGS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className={styles.label}>
-                  Motivation / context (optional)
-                </label>
-                <textarea
-                  className={styles.textarea}
-                  value={form.motivation}
-                  onChange={(e) =>
-                    setForm({ ...form, motivation: e.target.value })
-                  }
-                  placeholder="Anything we should know? (timing, privacy, constraints, ideal outcome)"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className={styles.label}>Additional notes (optional)</label>
-                <textarea
-                  className={styles.textarea}
-                  value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Upgrades, dock/lakeshore, unique features, restrictions, etc."
-                />
+            <div>
+              <label className="text-sm text-white/80">Privacy Preferences (select all that apply)</label>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                {privacyOptions.map((opt) => (
+                  <label
+                    key={opt}
+                    className="flex cursor-pointer items-center gap-3 rounded-md border border-white/10 bg-neutral-950/30 px-4 py-3 hover:border-white/20"
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-amber-400"
+                      checked={privacyPrefs.includes(opt)}
+                      onChange={() => togglePrivacy(opt)}
+                    />
+                    <span className="text-sm text-white/85">{opt}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
-            {status === 'error' && (
-              <div className={styles.alertErr}>{errorMsg}</div>
+            <div>
+              <label className="text-sm text-white/80">Additional Notes</label>
+              <textarea
+                className="mt-2 w-full rounded-md border border-white/10 bg-neutral-950/60 px-4 py-3 text-white placeholder:text-white/30 outline-none focus:border-amber-400/70"
+                rows={5}
+                placeholder="Anything we should know (lake, privacy needs, showings, special features, constraints)..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </div>
+
+            {status === "error" && (
+              <div className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {errorMsg}
+              </div>
             )}
 
-            <div className={styles.btnRow}>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 type="submit"
-                className={styles.btn}
-                disabled={isSubmitting}
+                disabled={status === "submitting"}
+                className="inline-flex items-center justify-center rounded-md bg-amber-500 px-6 py-3 font-semibold text-neutral-950 hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isSubmitting ? 'Submitting…' : 'Request Private Sell Strategy'}
+                {status === "submitting" ? "Submitting..." : "Request Private Seller Strategy"}
               </button>
-
-              <div className={styles.fine}>
-                Prefer phone? Call <strong>651-262-8312</strong>
-                <div className="mt-1">We respect privacy. No spam. Unsubscribe anytime.</div>
+              <div className="text-sm text-white/60">
+                Prefer phone? Call <span className="font-semibold text-white">651-262-8312</span>
               </div>
+            </div>
+
+            <div className="text-xs text-white/50">
+              We respect your privacy. No spam. Unsubscribe anytime.
             </div>
           </form>
         </div>
-      </div>
 
-      <div className="mx-auto mt-10 max-w-5xl text-neutral-800">
-        <h2 className="font-serif text-2xl">What happens next</h2>
-        <ul className="mt-3 list-disc pl-5 text-sm text-neutral-700 space-y-2">
-          <li>We confirm privacy level and timeline within 24 hours</li>
-          <li>We propose a discreet strategy (private-first vs. staged marketing)</li>
-          <li>We match with qualified buyers where appropriate</li>
-          <li>We coordinate next steps (prep, pricing, and private showings)</li>
-        </ul>
+        {/* Sidebar */}
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl md:p-10">
+          <h2 className="text-xl font-semibold">What happens next</h2>
+          <ul className="mt-4 space-y-3 text-sm text-white/75">
+            <li>• We confirm your privacy requirements</li>
+            <li>• We prepare a discreet pricing + positioning plan</li>
+            <li>• If desired, we quietly match with qualified buyers</li>
+            <li>• No public marketing unless you approve</li>
+          </ul>
+
+          <div className="mt-8 rounded-xl border border-white/10 bg-neutral-950/40 p-5">
+            <div className="text-sm font-semibold">Backend status</div>
+            <div className="mt-2 text-sm text-white/70">
+              Lead endpoint:{" "}
+              <span className={endpoint ? "text-emerald-300" : "text-red-300"}>
+                {endpoint ? "Configured" : "Not configured"}
+              </span>
+            </div>
+            {!endpoint && (
+              <div className="mt-3 text-xs text-white/55">
+                Set <code className="text-white">NEXT_PUBLIC_LEAD_ENDPOINT</code> in Vercel and redeploy.
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
