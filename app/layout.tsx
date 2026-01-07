@@ -20,15 +20,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <nav className="nav-links" aria-label="Primary">
               <Link href="/">Home</Link>
               <Link href="/winter-tips">Winter Tips</Link>
+              <Link href="/private-match">Private Match</Link>
               <Link href="/buyers">For Buyers</Link>
               <Link href="/sellers">For Sellers</Link>
               <Link href="/guides">Guides</Link>
               <Link href="/partners">Partner</Link>
-              <Link href="/private-match">Private Match</Link>
             </nav>
 
             <Link className="nav-cta" href="/private-match">
-              Private Match
+              Private Matches
             </Link>
           </div>
         </header>
@@ -42,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <h4>Quick Links</h4>
                 <ul>
                   <li><Link href="/winter-tips">Winter Buying Tips</Link></li>
+                  <li><Link href="/private-match">Private Lake Property Match</Link></li>
                   <li><Link href="/buyers">For Buyers</Link></li>
                   <li><Link href="/sellers">For Sellers</Link></li>
                   <li><Link href="/partners">Partner With Us</Link></li>
