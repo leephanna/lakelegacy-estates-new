@@ -459,3 +459,24 @@ function Field({
     </div>
   );
 }
+
+One critical thing
+
+If you haven’t set it yet, do this in Vercel → Project → Settings → Environment Variables:
+
+NEXT_PUBLIC_LEAD_ENDPOINT = https://ai4u-concierge-mail.leehanna8.workers.dev/lead (or whatever your current /lead endpoint is)
+
+Deploy again after setting it.
+
+Why this fixes the “doesn’t match the site” problem
+
+Your site’s layout is already establishing the brand: black base + white text + gold CTA + soft borders.
+This replacement page uses the same visual system, and avoids the common mismatch causes:
+
+white backgrounds
+
+default form styles
+
+missing max-width gutters
+
+inconsistent button styling
