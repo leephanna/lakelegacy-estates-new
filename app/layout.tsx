@@ -30,6 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link className="nav-cta" href="/private-match">
               Private Matches
             </Link>
+            <Link href="/private-sell" className="nav-link">
+               Private Sell
+            </Link>
           </div>
         </header>
 
