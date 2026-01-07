@@ -27,15 +27,18 @@ export default function HomePage() {
           <p style={{ fontSize: '16px', marginBottom: '32px', color: 'rgba(255,255,255,0.85)' }}>
             Coldwell Banker - Leonhardt Team
           </p>
+          <p style={{ fontSize: '16px', marginBottom: '24px', color: 'rgba(255,255,255,0.9)', fontStyle: 'italic' }}>
+            We'll send you exclusive opportunities before they hit the public market.
+          </p>
           <div className="actions" style={{ justifyContent: 'center', marginBottom: '32px' }}>
             <Link href="/private-match">
               <button className="btn-primary" style={{ padding: '14px 32px', fontSize: '16px' }}>
                 Get My Private Matches
               </button>
             </Link>
-            <Link href="/off-market">
+            <Link href="/buyers">
               <button className="btn-secondary" style={{ padding: '12px 30px', fontSize: '16px', color: '#fff', borderColor: '#fff' }}>
-                Confidential Preview Access
+                Private Client Intake
               </button>
             </Link>
           </div>
