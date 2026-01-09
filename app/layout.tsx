@@ -25,26 +25,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Top bar */}
         <div className="border-b border-white/10 bg-neutral-950/80 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-            <Link href="/" className="flex items-baseline gap-3">
-              <span className="text-lg font-semibold tracking-wide">
-                Lake &amp; Legacy Estates
-              </span>
-              <span className="hidden text-xs text-white/60 md:inline">
-                Private Client Concierge — Jamie McNeely
-              </span>
-            </Link>
+            
+            {/* Left: Private Sell CTA + Logo */}
+            <div className="flex items-center gap-4">
+              <Link
+                href="/private-sell"
+                className="inline-flex items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-400 transition"
+              >
+                Private Sell
+              </Link>
+              
+              <Link href="/" className="flex items-baseline gap-3">
+                <span className="text-lg font-semibold tracking-wide">
+                  Lake &amp; Legacy Estates
+                </span>
+                <span className="hidden text-xs text-white/60 lg:inline">
+                  Private Client Concierge — Jamie McNeely
+                </span>
+              </Link>
+            </div>
 
-            {/* Desktop nav */}
-            <nav className="hidden items-center gap-5 md:flex">
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm text-white/75 hover:text-white transition"
-                >
-                  {item.label}
-                </Link>
-              ))}
+            {/* Desktop nav + Right CTA */}
+            <div className="hidden items-center gap-5 md:flex">
+              <nav className="flex items-center gap-5">
+                {NAV.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm text-white/75 hover:text-white transition"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
 
               <Link
                 href="/private-match"
@@ -52,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 Private Matches
               </Link>
-            </nav>
+            </div>
           </div>
 
           {/* Mobile nav (simple, always visible) */}
@@ -67,6 +80,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {item.label}
                 </Link>
               ))}
+            </div>
+            <div className="mt-3 flex gap-3">
+              <Link
+                href="/private-sell"
+                className="font-semibold text-amber-300 hover:text-amber-200"
+              >
+                Private Sell
+              </Link>
               <Link
                 href="/private-match"
                 className="font-semibold text-amber-300 hover:text-amber-200"
