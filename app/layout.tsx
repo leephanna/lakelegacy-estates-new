@@ -7,153 +7,175 @@ export const metadata: Metadata = {
   description: "Private Client Concierge — Jamie McNeely",
 };
 
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/winter-tips", label: "Winter Tips" },
-  { href: "/private-match", label: "Private Match" },
-  { href: "/private-sell", label: "Private Sell" },
-  { href: "/buyers", label: "For Buyers" },
-  { href: "/sellers", label: "For Sellers" },
-  { href: "/guides", label: "Guides" },
-  { href: "/partner", label: "Partner" },
-];
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="bg-neutral-950">
-      <body className="min-h-screen bg-neutral-950 text-white antialiased">
-        {/* Top bar */}
-        <div className="border-b border-white/10 bg-neutral-950/80 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-            
+    <html lang="en">
+      <body
+        style={{
+          margin: 0,
+          minHeight: "100vh",
+          backgroundColor: "#0a0a0a",
+          color: "#ffffff",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+        }}
+      >
+        {/* Header */}
+        <header
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 50,
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: "rgba(10,10,10,0.85)",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1152px",
+              margin: "0 auto",
+              padding: "16px 24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "16px",
+            }}
+          >
             {/* Left: Private Sell CTA + Logo */}
-            <div className="flex items-center gap-4">
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
               <Link
                 href="/private-sell"
-                className="inline-flex items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-400 transition"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "10px 18px",
+                  backgroundColor: "#f59e0b",
+                  color: "#0a0a0a",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
               >
                 Private Sell
               </Link>
-              
-              <Link href="/" className="flex items-baseline gap-3">
-                <span className="text-lg font-semibold tracking-wide">
-                  Lake &amp; Legacy Estates
-                </span>
-                <span className="hidden text-xs text-white/60 lg:inline">
-                  Private Client Concierge — Jamie McNeely
-                </span>
-              </Link>
-            </div>
-
-            {/* Desktop nav + Right CTA */}
-            <div className="hidden items-center gap-5 md:flex">
-              <nav className="flex items-center gap-5">
-                {NAV.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="text-sm text-white/75 hover:text-white transition"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
 
               <Link
-                href="/private-match"
-                className="ml-2 inline-flex items-center justify-center rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-neutral-950 hover:bg-amber-400 transition"
+                href="/"
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 600,
+                  letterSpacing: "0.025em",
+                  color: "#ffffff",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
               >
-                Private Matches
+                Lake &amp; Legacy Estates
               </Link>
             </div>
+
+            {/* Center: Navigation */}
+            <nav
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <Link href="/" style={navLinkStyle}>Home</Link>
+              <Link href="/winter-tips" style={navLinkStyle}>Winter Tips</Link>
+              <Link href="/private-match" style={navLinkStyle}>Private Match</Link>
+              <Link href="/buyers" style={navLinkStyle}>For Buyers</Link>
+              <Link href="/sellers" style={navLinkStyle}>For Sellers</Link>
+              <Link href="/guides" style={navLinkStyle}>Guides</Link>
+              <Link href="/partner" style={navLinkStyle}>Partner</Link>
+            </nav>
+
+            {/* Right: Private Matches CTA */}
+            <Link
+              href="/private-match"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "10px 18px",
+                backgroundColor: "#f59e0b",
+                color: "#0a0a0a",
+                borderRadius: "6px",
+                fontSize: "14px",
+                fontWeight: 600,
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Private Matches
+            </Link>
           </div>
+        </header>
 
-          {/* Mobile nav (simple, always visible) */}
-          <div className="mx-auto max-w-6xl px-4 pb-3 md:hidden">
-            <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
-              {NAV.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-white/80 hover:text-white transition"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            <div className="mt-3 flex gap-3">
-              <Link
-                href="/private-sell"
-                className="font-semibold text-amber-300 hover:text-amber-200"
-              >
-                Private Sell
-              </Link>
-              <Link
-                href="/private-match"
-                className="font-semibold text-amber-300 hover:text-amber-200"
-              >
-                Private Matches
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Page content */}
-        <main className="mx-auto w-full max-w-6xl px-4 py-10">{children}</main>
+        {/* Main Content */}
+        <main
+          style={{
+            maxWidth: "1152px",
+            margin: "0 auto",
+            padding: "40px 24px",
+          }}
+        >
+          {children}
+        </main>
 
         {/* Footer */}
-        <footer className="mt-16 border-t border-white/10 bg-neutral-950">
-          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-4 py-12 md:grid-cols-3">
+        <footer
+          style={{
+            marginTop: "64px",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+            backgroundColor: "#0a0a0a",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1152px",
+              margin: "0 auto",
+              padding: "48px 24px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "40px",
+            }}
+          >
+            {/* Quick Links */}
             <div>
-              <div className="text-sm font-semibold text-white">Quick Links</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <Link className="block text-white/70 hover:text-white" href="/winter-tips">
-                  Winter Buying Tips
-                </Link>
-                <Link className="block text-white/70 hover:text-white" href="/private-match">
-                  Private Lake Property Match
-                </Link>
-                <Link className="block text-white/70 hover:text-white" href="/private-sell">
-                  Private Seller Intake
-                </Link>
-                <Link className="block text-white/70 hover:text-white" href="/buyers">
-                  For Buyers
-                </Link>
-                <Link className="block text-white/70 hover:text-white" href="/sellers">
-                  For Sellers
-                </Link>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", marginBottom: "12px" }}>
+                Quick Links
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Link href="/winter-tips" style={footerLinkStyle}>Winter Buying Tips</Link>
+                <Link href="/private-match" style={footerLinkStyle}>Private Lake Property Match</Link>
+                <Link href="/private-sell" style={footerLinkStyle}>Private Seller Intake</Link>
+                <Link href="/buyers" style={footerLinkStyle}>For Buyers</Link>
+                <Link href="/sellers" style={footerLinkStyle}>For Sellers</Link>
               </div>
             </div>
 
+            {/* Contact */}
             <div>
-              <div className="text-sm font-semibold text-white">Contact</div>
-              <div className="mt-3 space-y-2 text-sm text-white/70">
-                <div>651-262-8312</div>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", marginBottom: "12px" }}>
+                Contact
+              </div>
+              <div style={{ fontSize: "14px", color: "rgba(255,255,255,0.7)" }}>
+                <div style={{ marginBottom: "8px" }}>651-262-8312</div>
                 <div>jamiemcneely@leonhardtteam.com</div>
               </div>
             </div>
 
+            {/* Legal */}
             <div>
-              <div className="text-sm font-semibold text-white">Legal</div>
-              <div className="mt-3 space-y-2 text-sm">
-                <Link className="block text-white/70 hover:text-white" href="/privacy">
-                  Privacy Policy
-                </Link>
-                <Link className="block text-white/70 hover:text-white" href="/terms">
-                  Terms of Service
-                </Link>
+              <div style={{ fontSize: "14px", fontWeight: 600, color: "#ffffff", marginBottom: "12px" }}>
+                Legal
               </div>
-            </div>
-          </div>
-
-          <div className="border-t border-white/10">
-            <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 text-xs text-white/50">
-              <div>© {new Date().getFullYear()} Lake &amp; Legacy Estates</div>
-              <div>AI4Utech.com</div>
-            </div>
-          </div>
-        </footer>
-      </body>
-    </html>
-  );
-}
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                <Link href="/privacy" style={footerLinkStyle}>Privacy 
